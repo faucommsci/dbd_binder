@@ -1,6 +1,7 @@
 # Specifying an R environment with a runtime.txt file
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/chrdrn/template-binder-rstudio/main)
+- Jupyter Notebook + R: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/chrdrn/template-binder-rstudio/main)
+- RStudio: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/chrdrn/template-binder-rstudio/main?urlpath=rstudio)
 
 Binder supports using R and RStudio, with libraries pinned to a specific
 snapshot on [packagemanager.rstudio.com](https://packagemanager.rstudio.com/client/#/).
