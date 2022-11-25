@@ -1,0 +1,46 @@
+---
+title: "Title"
+subtitle: "Subtitle"
+author: 
+  - name: Name Surname 
+    url: Personal URL
+    affiliation: Lehrstuhl für Kommunikationswissenschaft
+    affiliation-url: https://www.kowi.rw.fau.de
+date: 23 11 2022
+date-format: "DD.MM.YYYY"
+format: 
+  html:
+    toc: true
+    toc-depth: 4
+callout-appearance: simple
+execute: 
+  cache: true
+  eval: true
+  echo: true
+  message: false
+  warning: false
+highlight-style: atom-one
+editor_options: 
+  chunk_output_type: console
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
