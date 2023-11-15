@@ -1,3 +1,5 @@
 install.packages(c(
+    "here",
     "tidyverse",
-    "easystats"))
+    "easystats",
+    "sjmisc"))

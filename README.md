@@ -1,58 +1,18 @@
-# Specifying an R environment with a runtime.txt file
+# Digital behavioral data - Binder <a href="https://faucommsci.github.io/dbd_2023/"><img src="img/dbd_hex.png" align="right" height="150"/></a>
 
-- Jupyter Notebook + R: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/chrdrn/template-binder-rstudio/main)
-- RStudio: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/chrdrn/template-binder-rstudio/main?urlpath=rstudio)
+<!-- badges: start -->
+- RStudio: [![Binder](img/badge-binder-rstudio.svg)](https://mybinder.org/v2/gh/chrdrn/digital-behavioral-data-binder/HEAD?urlpath=rstudio)
 
-Binder supports using R and RStudio, with libraries pinned to a specific
-snapshot on [packagemanager.rstudio.com](https://packagemanager.rstudio.com/client/#/).
+<!-- badges: end -->
 
-### Requirements and suggestions
-#### Create/Edit `runtime.txt` 
-You need to create or edit [`runtime.txt`](binder/runtime.txt) file that is located in the `binder` folder and formatted like:
+## Links
+🔗 to github-repository of the course [`Digital behavioral data`](https://github.com/faucommsci/dbd_2023)
 
-```
-r-<r-version>-<YYYY>-<MM>-<DD>
-```
+🔗 to github-page of the course: [https://chrdrn.github.io/digital-behavioral-data/](https://faucommsci.github.io/dbd_2023/)
 
-where `<r-version>` is a version of R (like 4.1, 4.0, etc) you want to use,
-and `<YYYY>-<MM>-<DD>` is the date for [a snapshot](https://packagemanager.rstudio.com/client/#/repos/1/overview)
-from [packagemanager.rstudio.com](https://packagemanager.rstudio.com) that will
-be used for installing your R packages.
+🔗 to [Assistant Professorship for Communication Science](https://www.communicationscience.rw.fau.de/) [english]
 
-Try using a date newer than `2022-01-01`, as you'll get faster
-package installs thanks to [binary packages](https://www.rstudio.com/blog/package-manager-v1-1-no-interruptions/)
-from rstudio.packagemanager.com!
+🔗 to [Chair of Communication Science](https://www.kowi.rw.fau.de/) [german]
 
-#### (Pre-)Install packages
 
-To install R libraries, add `install.package("<package-name>")` calls to
-[`install.R`](binder/install.R) located in the `binder` folder. If you want to pin to a specific version of the library, you
-can also do `devtools::install_version("<package-name>", "<version>")`.
 
-For some R packages, you might need to install system packages via apt - you can
-do so by writing out a list of apt package names in `apt.txt`. You can find
-the list of such packages in the page for your package at
-[packagemanager.rstudio.com](https://packagemanager.rstudio.com/client/#/). Make sure
-to select "Ubuntu 18.04 (Bionic)" in the dropdown on the top right.
-
-### URL addresses for RStudio and Shiny environments
-
-The Binder repository can be used to allow anyone to access an RStudio environment containing our code and data right
-in their web browser. It also allows hosting a Shiny app. For those purposes, we have to append a bit of text to the
-URL of our Binder repository, which we can find out at [mybinder.org](https://mybinder.org/) when we enter
-the URL of our original repository from GitHub or Figshare, etc.
-
-- For the RStudio environment, we must add the following at the end of the URL: `?urlpath=rstudio`
-
-  - Example: http://mybinder.org/v2/gh/binder-examples/r/master?urlpath=rstudio
-
-- For the Shiny app environment, we must add the following at the end of the URL: `?urlpath=shiny`. In this case, we
-also have to note that if the Shiny app files are located in a folder, this folder should be specified in the URL,
-after a slash. We would then also have to put in a trailing slash at the end of the URL, and to avoid spaces in the
-name of the repository, placing instead a hyphen (the reason is that spaces are converted to `%20`).
-
-  - Example: http://mybinder.org/v2/gh/binder-examples/r/master?urlpath=shiny/bus-dashboard/
-
-### Sources
--   https://github.com/binder-examples/r
--   https://github.com/jobreu/binder-r-demo
