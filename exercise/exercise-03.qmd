@@ -1,0 +1,360 @@
+---
+title: "Exercise 03: 🔨 Working with R "
+subtitle: "Hollywood Age Gap"
+format: 
+  html:
+    toc: true
+    toc-depth: 4
+callout-appearance: simple
+execute: 
+  cache: true
+  eval: true
+  echo: true
+  message: false
+  warning: false
+highlight-style: atom-one
+editor_options: 
+  chunk_output_type: console
+---
+
+::: {.callout-tip icon="false"}
+[![Quarto Document](/img/badge-quarto_document.svg)](https://github.com/faucommsci/dbd_2023/blob/main/exercise/exercise-03.qmd) Download source file
+
+[![Binder RStudio](/img/badge-binder_rstudio.svg)](https://mybinder.org/v2/gh/faucommsci/dbd_binder/HEAD/HEAD?urlpath=rstudio) Open this exercise in interactive and executable environment
+:::
+
+## Background
+
+-   The best way to learn R is by trying. This document tries to display a version of the "normal" data processing procedure.
+-   Use `tidytuesday` data as an example to showcase the potential
+
+::: callout-note
+## Todays's data basis: Hollywood Age Gaps
+
+> An informational site showing the age gap between movie love interests.
+
+The data follows certain rules:
+
+-   The two (or more) actors play actual love interests (not just friends, coworkers, or some other non-romantic type of relationship)
+-   The youngest of the two actors is at least 17 years old
+-   Not animated characters
+:::
+
+## Packages
+
+-   Zum Laden der Pakete wird das Paket `pacman::pload()` genutzt, dass gegenüber der herkömmlichen Methode mit `library()` eine Reihe an Vorteile hat:
+
+    -   Prägnante Syntax
+    -   Automatische Installation (wenn Paket noch nicht vorhanden)
+    -   Laden mehrerer Pakete auf einmal
+    -   Automatische Suche nach `dependencies`
+
+```{r load-packages}
+pacman::p_load(
+  here, 
+  magrittr, 
+  tidyverse,
+  janitor,
+  easystats,
+  sjmisc,
+  ggpubr)
+```
+
+## Codechunks aus der Sitzung
+
+### Die erste "Runde" der Datenaufbereitung
+
+#### Datenimport via URL
+
+| Variable            | Description                                                                    |
+|:------------------------|:----------------------------------------------|
+| `movie_name`        | Name of the film                                                               |
+| `release_year`      | Release year                                                                   |
+| `director`          | Director of the film                                                           |
+| `age_difference`    | Age difference between the characters in whole years                           |
+| `couple_number`     | An identifier for the couple in case multiple couples are listed for this film |
+| `actor_1_name`      | The name of the older actor in this couple                                     |
+| `actor_2_name`      | The name of the younger actor in this couple                                   |
+| `actor_1_birthdate` | The birthdate of the older member of the couple                                |
+| `actor_2_birthdate` | The birthdate of the younger member of the couple                              |
+| `actor_1_age`       | The age of the older actor when the film was released                          |
+| `actor_2_age`       | The age of the younger actor when the film was released                        |
+
+: Variablennamen und -beschreibungen
+
+```{r import-data-raw}
+# Import data from URL
+age_gaps <- read_csv("http://hollywoodagegap.com/movies.csv") %>% 
+  janitor::clean_names()
+
+# Check data set
+age_gaps
+```
+
+#### Initiale Überprüfung der Daten
+
+::: callout-note
+## Sind die Daten *"technisch korrekt*"?
+
+-   ✅ [Wie viele Fälle sind enthalten? Wie viele Variablen?](#check-overview)
+
+-   ✅ [Wie lauten die Variablennamen? Sind sie sinnvoll?](#check-overview)
+
+-   ✅ [Welchen Typ hat jede Variable, z. B. numerisch, kategorisch, logisch?](#check-overview-correction)
+
+-   ✅ [Wie viele eindeutige Werte hat jede Variable?](#check-location-parameter)
+
+-   ✅ [Welcher Wert tritt am häufigsten auf, und wie oft kommt er vor?](#check-location-parameter)
+
+-   ✅ [Gibt es fehlende Werte? Wenn ja, wie häufig ist dies der Fall?](#check-location-parameter)
+:::
+
+##### Überblick über die Daten {#check-overview}
+
+```{r table-initial-overview}
+age_gaps %>% glimpse()
+```
+
+##### Korrekturen {#check-overview-correction}
+
+```{r recoding-data-to-correct}
+age_gaps_correct <- age_gaps %>% 
+  mutate(
+    across(ends_with("_birthdate"), ~as.Date(.)) # set dates to dates
+  )
+```
+
+##### Überprüfung Lageparameter {#check-location-parameter}
+
+```{r table-location-parameter}
+age_gaps_correct %>% descr()
+```
+
+### Die ersten Datenexplorationen
+
+#### Wie sind die Altersunterschiede verteilt?
+
+```{r figure-age-difference}
+age_gaps_correct %>% 
+    ggplot(aes(x = age_difference)) +
+    geom_bar() +
+    theme_pubr()
+```
+
+#### In welchen Filmen ist der Altersunterschied am höchsten?
+
+```{r table-movies-highest-age-difference}
+age_gaps_correct %>% 
+    arrange(desc(age_difference)) %>% 
+    select(movie_name, age_difference, release_year) 
+```
+
+```{r table-movies-highest-age-difference-current}
+age_gaps_correct %>% 
+    filter(release_year >= 2022) %>% 
+    arrange(desc(age_difference)) %>% 
+    select(
+        movie_name, age_difference, release_year, 
+        actor_1_name, actor_2_name) 
+```
+
+#### Gibt es einen Zusammenhang zwischen Altersunterschied und Release?
+
+##### (Durchschnitts-)Unterschied nach Jahren
+
+```{r figure-age-difference-mean-by-year}
+age_gaps_correct %>% 
+    group_by(release_year) %>% 
+    summarise(age_difference_mean = mean(age_difference)) %>% 
+    ggplot(aes(release_year, age_difference_mean)) +
+    geom_col() +
+    theme_pubr()
+```
+
+##### Verteilung nach Jahren
+
+```{r figure-age-difference-by-year}
+#| column: page
+#| fig-width: 16
+#| fig-height: 9
+
+ggpubr::ggboxplot(
+    data = age_gaps_correct, 
+    x = "release_year", 
+    y = "age_difference", 
+  ) + 
+   # Rotate x-axis labels by 90 degrees
+  theme(
+    axis.text.x = element_text(
+        angle = 90,
+        vjust = 0.5,
+         hjust=1))  
+```
+
+##### Überprüfung der Korrelation
+
+```{r model-age-difference-release-year-correlation}
+age_gaps %>%
+  select(release_year, age_difference) %>% 
+  correlation::correlation()
+```
+
+##### Schätzung OLS
+
+```{r model-age-difference-release-year-lm}
+# Schätzung des Models
+mdl <- lm(age_difference ~ release_year, data = age_gaps_correct)
+
+# Output
+mdl %>% parameters::parameters()
+mdl %>% performance::model_performance()
+```
+
+```{r model-age-difference-release-lm-report}
+mdl %>% report::report()
+```
+
+## 📋 Exercise: Welche Rolle spielt das Geschlecht?
+
+::: callout-note
+## Spielt das Geschlecht eine Rolle?
+
+-   Der folgende Abschitt befasst sich nun ergänzend mit der Frage, welche Rolle das Geschlecht mit Blick auf die "Gültigkeit" der vorherigen Ergebnisse spielt
+-   Dazu sind jedoch weitere Explorations- und Überarbeitungsschritte notwendig
+:::
+
+### Übeprüfung der `_gender`-Variablen
+
+::: callout-caution
+## Exercise 1
+
+Nutzen Sie die Funktion `sjmisc::frq()` und schauen Sie sich im Datensatz `age_gaps_correct` die Variablen `actor_1_gender` und `actor_2_gender` an.
+:::
+
+```{r exercise_1}
+# ADD YOUR CODE HERE
+```
+
+::: callout-caution
+## Exercise 2
+
+Nutzen Sie die Funktion `sjmisc::flat_talbe()` und den Datensatz `age_gaps_correct` um eine Kreuztabelle der Variablen `actor_1_gender` und `actor_2_gender` zu erstellen.
+:::
+
+```{r exercise_2}
+# ADD YOUR CODE HERE
+```
+
+### Sind die Daten "konsistent"?
+
+#### Überprüfung der Sortierung
+
+```{r table-check-variable-arrangement}
+age_gaps_correct %>% 
+  summarise(
+      p1_older = mean(actor_1_age > actor_2_age), # older person first?
+      p1_male  = mean(actor_1_gender == "man"),  # male person first? 
+      p_1_first_alpha = mean(actor_1_name < actor_2_name) # alphabetical order?
+  )
+```
+
+### Überprüfung der Anzahl pro Paare pro Film
+
+```{r table-check-couple-numbers}
+# Create data
+couples <- age_gaps_correct %>% 
+  group_by(movie_name) %>% 
+  summarise(n = n()) 
+
+# Distribution
+couples %>% frq(n)
+
+# Movies with a loot of couples 
+couples %>% 
+  filter(n > 3) %>% 
+  arrange(desc(n))
+```
+
+### Korrekturen
+
+```{r recoding-data-to-consistent}
+age_gaps_consistent <- age_gaps_correct %>% 
+  # If multiple couples, assign couple number by movie
+  mutate(
+      couple_number = row_number(),
+      .by = "movie_name"
+  ) %>% 
+  # Change data structure (one line per actor in a coulpe of a movie)
+  pivot_longer(
+    cols = starts_with(c("actor_1_", "actor_2_")),
+    names_to = c(NA, NA, ".value"),
+    names_sep = "_"
+  ) %>% 
+  # Put older actor first
+  arrange(desc(age_difference), movie_name, birthdate) %>% 
+    mutate(
+    position = row_number(),
+    .by = c("movie_name", "couple_number")
+  ) %>% 
+  pivot_wider(
+    names_from = "position",
+    names_glue = "actor_{position}_{.value}",
+    values_from = c("name", "gender", "birthdate", "age")
+  ) %>% 
+  mutate(
+    couple_structure = case_when(
+      actor_1_gender == "woman" & actor_2_gender == "woman" ~ 1,
+      actor_1_gender == "man" & actor_2_gender == "man" ~ 2,
+      actor_1_gender != "man" ~ 3, 
+      actor_1_gender == "man" ~ 4,
+    ),
+    older_male_hetero  = sjmisc::rec(
+      couple_structure, 
+      rec="3=0; 4=1; ELSE=NA", 
+      to.factor = TRUE
+    )
+  )
+
+```
+
+## Die zweite Datenexploration
+
+### Alterskombinationen im Überblick
+
+::: callout-caution
+## Exercise 3
+
+Nutzen Sie die Funktion `sjmisc::frq()` und schauen Sie sich im Datensatz `age_gaps_consistent` die Variablen `couple_structure` und `older_male_hetero` an.
+:::
+
+```{r exercise_3}
+# ADD YOUR CODE HERE
+```
+
+### Wie sind die Altersunterschiede unterteilt, unter Berücksichtiung des Geschlechts?
+
+#### Graphische Überprüfung
+
+::: callout-caution
+## Exercise 4
+
+-   Erstellen Sie, auf Basis des Datensatzes `age_gaps_consistent`, einen `ggplot`.
+-   Nutzen Sie im Argument `aes()` die Variable `age_difference` als `x`-Variable und `older_male_hetero` für das Argument `fill`.
+-   Nutzen Sie `geom_bar` zur Erzeugung des Plots.
+-   *Optional: Verwenden Sie `theme_pubr`*
+:::
+
+```{r exercise_4}
+# ADD YOUR CODE HERE
+```
+
+#### Überprüfung durch Modellierung
+
+```{r model-age-difference-release-year-gender-lm}
+mdl <- lm(age_difference ~ release_year + older_male_hetero, data = age_gaps_consistent)
+
+# Output
+mdl %>% parameters::parameters()
+mdl %>% performance::model_performance()
+mdl %>% report::report()
+```
