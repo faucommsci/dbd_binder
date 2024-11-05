@@ -1,7 +1,10 @@
 install.packages(c(
     "pacman", 
-    "here",
-    "fs", 
-    "tidyverse",
+    "here", 
+    "magrittr", 
+    "janitor",
     "easystats",
-    "sjmisc"))
+    "sjmisc",
+    "ggpubr", 
+    "tidyverse"
+    ))
